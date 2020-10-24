@@ -1,61 +1,17 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Head from 'next/head';
-
+import { getMovies } from '../data';
 import Carousel from '../components/Carousel';
-import Footer from '../components/Footer';
 import MovieList from '../components/MovieList';
-import Navbar from '../components/Navbar';
 import SideMenu from '../components/SideMenu';
 
 // Next.js automatically adds the React import when JSX is used indeed.
 // However keep in mind that we do still need to import React from 'react'
 // when the React variable is used.
 
-const MOVIE_DATA = [
-  {
-    id: '1',
-    name: 'The Shawshank Redemption',
-    releaseYear: 1994,
-    description:
-      'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.',
-    rating: 4.8,
-    genre: 'drama',
-    image:
-      'https://m.media-amazon.com/images/M/MV5BNjQ2NDA3MDcxMF5BMl5BanBnXkFtZTgwMjE5NTU0NzE@._V1_CR0,60,640,360_AL_UX477_CR0,0,477,268_AL_.jpg',
-  },
-  {
-    id: '2',
-    name: 'The Dark Knight',
-    releaseYear: 2008,
-    description:
-      'When the menace known as The Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham. The Dark Knight must accept one of the greatest psychological and physical tests of his ability to fight injustice.',
-    rating: 4.7,
-    genre: 'action, crime, drama',
-    image:
-      'https://img.cinemablend.com/filter:scale/quill/c/3/8/0/f/4/c380f4f12cfeec19f0c40c6f57db188f2f98cca8.jpg?mw=600',
-  },
-  {
-    id: '3',
-    name: 'Lord of the Rings',
-    releaseYear: 2004,
-    description:
-      'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.',
-    rating: 4.9,
-    genre: 'adventure, drama, fantasy',
-    image:
-      'https://img.cinemablend.com/filter:scale/quill/0/f/5/2/a/6/0f52a6843a25c1a5c1f9a0c00548cad9e1d912e2.jpg?mw=600',
-  },
-];
-export default function Home() {
+function Home({ movies, images }) {
+  // console.log(JSON.stringify(images))
   return (
     <div>
-      <Head>
-        <title>Home</title>
-      </Head>
-
-      <Navbar />
-
-      <div className='home-page'>
+      <div>
         <div className='container'>
           <div className='row'>
             <div className='col-lg-3'>
@@ -63,25 +19,89 @@ export default function Home() {
             </div>
 
             <div className='col-lg-9'>
-              <Carousel />
+              <Carousel images={images} />
 
               <div className='row'>
-                <MovieList movies={MOVIE_DATA} />
+                <MovieList movies={movies} />
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <Footer />
-
-      <style jsx>
-        {`
-          .home-page {
-            padding-top: 80px;
-          }
-        `}
-      </style>
     </div>
   );
 }
+
+Home.getInitialProps = async () => {
+  // console.log('Calling from home');
+  const movies = await getMovies();
+
+  // rendering images from the server
+  // other option is on a client side by passing props directly into <Carousel />
+  const images = movies.map((movie) => {
+    // returning an image
+    return {
+      url: movie.image,
+      id: `image-${movie.id}`,
+      name: movie.name
+    }
+  })
+
+  // Make sure the returned object from getStaticProps is a plain Object
+  // and not using Date, Map or Set.
+  return {
+    // this data will be passed to the page component as props
+    movies,
+    images
+  };
+};
+
+export default Home;
+
+// getStaticProps which is same as older getInitialProps
+// is an async function that can be added to any page as a static method
+// Static methods are used to implement functions that belong to the particular class,
+// but not to any particular object of it.
+
+// getInitialProps is used to asynchronously fetch some data, which then populates props.
+// This function gets called at build time on server-side.
+// It won't be called on client-side, so you can even do
+// direct database queries.
+
+// export const getStaticProps = async () => {
+//   console.log('Calling from home')
+//   const movies = await getMovies();
+
+//   // Make sure the returned object from getStaticProps is a plain Object
+//   // and not using Date, Map or Set.
+//   return {
+//     // this data will be passed to the page component as props
+//     props: { movies: movies },
+//   };
+// };
+
+// For the initial page load, getInitialProps will run on the server only.
+// getInitialProps will then run on the client when navigating to
+// a different route via the next/link component or by using next/router.
+
+// getInitialProps enables server-side rendering in a page and
+// allows you to do initial data population, pre-rendering, it means sending
+// the page with the data already populated from the server.
+// This is especially useful for SEO.
+
+// Deployment. By default, next export will generate an out directory,
+// which can be served by any static hosting service or CDN.
+// We strongly recommend using Vercel even if your Next. js app is fully static.
+
+// You should use getInitialProps if:
+// The data required to render the page is available at build time ahead of a user’s request.
+// The data comes from a headless CMS - backend.
+// The data can be publicly cached (not user-specific).
+// The page must be pre-rendered (for SEO) and
+// be very fast — getStaticProps generates HTML and JSON files,
+// both of which can be cached by a CDN for performance.
+
+// We’ll talk about the three unique Next.js functions you can use to fetch data for pre-rendering:
+// 1. getStaticProps (Static Generation): Fetch data at build time.
+// 2. getStaticPaths (Static Generation): Specify dynamic routes to pre-render based on data.
+// 3. getServerSideProps (Server-side Rendering): Fetch data on each request.
