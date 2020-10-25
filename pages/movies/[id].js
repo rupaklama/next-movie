@@ -1,41 +1,39 @@
 // next js providers dynamic routes - [id]
+// To match a dynamic segment you can use the bracket syntax. This allows you to match named parameters.
+// pages/blog/[slug].js → /blog/:slug (/blog/hello-world)
 
 // If you want to access the router object inside any function component in your app,
-// you can use the useRouter hook
+// you can use the useRouter hook to access param values
 // import { useRouter } from 'next/router';
+
 import { getMovieById } from '../../data';
 
 const Movie = ({ movie }) => {
   // const router = useRouter();
   // console.log(router)
-  // to fetch movie by id
+  // to fetch movie by param - id
   // const { id } = router.query; // param name - 'id' of page
 
   return (
     <div className='container'>
       <div className='jumbotron'>
         <h1 className='display-4'>{movie.name}</h1>
-        <p className='lead'>
-          { movie.description }
-        </p>
+        <p className='lead'>{movie.description}</p>
         <hr className='my-4' />
-        <p>
-          { movie.genre }
-        </p>
+        <p>{movie.genre}</p>
         <a className='btn btn-primary btn-lg' href='#' role='button'>
           Learn more
         </a>
-
-      
       </div>
     </div>
   );
 };
 
-// call getMovieById('2')
+// pre-rendering data in the server
 Movie.getInitialProps = async context => {
-  const id = context.query.id
-  
+  // to access data in context object
+  const id = context.query.id;
+
   const movie = await getMovieById(id);
 
   return { movie };

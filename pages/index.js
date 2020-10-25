@@ -1,13 +1,26 @@
-import { getMovies } from '../data';
+import { getMovies, getCategories } from '../data';
 import Carousel from '../components/Carousel';
 import MovieList from '../components/MovieList';
 import SideMenu from '../components/SideMenu';
+import MovieCreateForm from '../components/MovieCreateForm';
 
 // Next.js automatically adds the React import when JSX is used indeed.
 // However keep in mind that we do still need to import React from 'react'
 // when the React variable is used.
 
-function Home({ movies, images }) {
+// Next.js has a file-system based router built on the concept of pages.
+// When a file is added to the pages directory it's automatically available as a route.
+// The files inside the pages directory can be used to define most common patterns.
+
+// The router will automatically route files named index to the root of the directory.
+// pages/index.js → '/' - homepage
+// pages/blog/index.js → '/blog' - blog page
+
+// The router supports nested files. If you create 
+// a nested folder structure files will be automatically routed in the same way still.
+// pages/blog/first-post.js → /blog/first-post
+
+function Home({ movies, images, categories }) {
   // console.log(JSON.stringify(images))
   return (
     <div>
@@ -15,14 +28,15 @@ function Home({ movies, images }) {
         <div className='container'>
           <div className='row'>
             <div className='col-lg-3'>
-              <SideMenu />
+              <h3>List a movie!</h3>
+              <MovieCreateForm />
             </div>
 
             <div className='col-lg-9'>
               <Carousel images={images} />
 
               <div className='row'>
-                <MovieList movies={movies} />
+                <MovieList movies={movies || []} />
               </div>
             </div>
           </div>
@@ -35,24 +49,28 @@ function Home({ movies, images }) {
 Home.getInitialProps = async () => {
   // console.log('Calling from home');
   const movies = await getMovies();
+  const categories = await getCategories();
 
   // rendering images from the server
   // other option is on a client side by passing props directly into <Carousel />
   const images = movies.map((movie) => {
-    // returning an image
+    // returning an array object with map
     return {
-      url: movie.image,
+      url: movie.cover,
+      // creating id
       id: `image-${movie.id}`,
-      name: movie.name
+      name: movie.name,
+     
     }
   })
 
-  // Make sure the returned object from getStaticProps is a plain Object
+  // Make sure the returned object from getInitialProps is a plain Object
   // and not using Date, Map or Set.
   return {
     // this data will be passed to the page component as props
     movies,
-    images
+    images,
+    categories
   };
 };
 

@@ -17,6 +17,7 @@ const Carousel = props => {
           ></li>
         ))}
       </ol>
+      
       <div className='carousel-inner' role='listbox'>
         {images.map((image, index) => (
           <div
